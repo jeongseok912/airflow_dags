@@ -14,4 +14,9 @@ with DAG(
     bash_command='date'
   )
   
-t1
+  t2 = BashOperator(
+    task_id="print_date2",
+    bash_command='date'
+  )
+  
+t1 >> t2
