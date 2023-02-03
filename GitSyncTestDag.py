@@ -9,7 +9,7 @@ with DAG(
   schedule_interval = None,
 ) as dag:
 
-  t1 = DummyOperator(
+  t1 = BashOperator(
     task_id="print_date",
     bash_command='date'
   )
