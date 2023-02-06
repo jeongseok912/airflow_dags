@@ -4,12 +4,13 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 
 
-def _download(year, month, day, hour, **context):
+def _download(year, month, day, hour, minute, **context):
     print("----------------------------")
     print(year)
     print(month)
     print(day)
     print(hour)
+    print(minute)
     print(context['logical_date'].strftime('%Y-%m-%d'))
     print("----------------------------")
 
@@ -24,10 +25,11 @@ with DAG(
         task_id="download",
         python_callable=_download,
         op_kwargs={
-            "year": "{{ execution_date.year.in_timezone('Asia/Seoul') }}",
-            "month": "{{ execution_date.month.in_timezone('Asia/Seoul') }}",
-            "day": "{{ execution_date.day.in_timezone('Asia/Seoul') }}",
-            "hour": "{{ execution_date.hour.in_timezone('Asia/Seoul') }}",
+            "year": "{{ execution_date.in_timezone('Asia/Seoul').year }}",
+            "month": "{{ execution_date.in_timezone('Asia/Seoul').month }}",
+            "day": "{{ execution_date.in_timezone('Asia/Seoul').day }}",
+            "hour": "{{ execution_date.in_timezone('Asia/Seoul').hour }}",
+            "minute": "{{ execution_date.in_timezone('Asia/Seoul').minute }}",
         },
         provide_context=True
     )
