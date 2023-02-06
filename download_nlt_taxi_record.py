@@ -6,13 +6,11 @@ from airflow.operators.python import PythonOperator
 
 # https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2019-02.parquet
 
-47
-
-
 def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
     print("----------------------------")
     print(context['logical_date'].strftime('%Y-%m-%d'))
-    print(int(context["logical_date"].timestamp()))
+    ts = context["logical_date"].timestamp()
+    print(int(ts))
 
     year_month = []
     for i in [2019, 2020, 2021, 2022]:
@@ -20,7 +18,9 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
             month = f"0{j}"[-2:]
             year_month.append(f"{i}-{month}")
     year_month = year_month[1:]  # 2019년 2월부터 FHVHV 데이터 존재
+    print(year_month)
     print(len(year_month))
+    print(ts / len(year_month))
     print("----------------------------")
 
 
