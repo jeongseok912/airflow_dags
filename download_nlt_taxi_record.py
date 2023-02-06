@@ -14,13 +14,13 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
     print(context['logical_date'].strftime('%Y-%m-%d'))
     print(int(context["logical_date"].timestamp()))
 
-    num = []
+    year_month = []
     for i in [2019, 2020, 2021, 2022]:
         for j in range(1, 13):
             month = f"0{j}"[-2:]
-            num.append(f"{i}-{month}")
-    print(num)
-    print(len(num))
+            year_month.append(f"{i}-{month}")
+    year_month = year_month[1:]  # 2019년 2월부터 FHVHV 데이터 존재
+    print(len(year_month))
     print("----------------------------")
 
 
