@@ -15,7 +15,7 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
     print(utc_hour)
     print(utc_minute)
     print(context['logical_date'].strftime('%Y-%m-%d'))
-    print(int(context["logical_date"]))
+    print(int(context["logical_date"].timestamp()))
     print("----------------------------")
 
 
