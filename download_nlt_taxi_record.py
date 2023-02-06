@@ -4,18 +4,22 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 
 
+# https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2019-02.parquet
+
+47
+
+
 def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
     print("----------------------------")
-    print(year)
-    print(month)
-    print(day)
-    print(hour)
-    print(minute)
-    print(utc_dt)
-    print(utc_hour)
-    print(utc_minute)
     print(context['logical_date'].strftime('%Y-%m-%d'))
     print(int(context["logical_date"].timestamp()))
+
+    num = []
+    for i in [2019, 2020, 2021, 2022]:
+        for j in range(1, 13):
+            month = f"0{j}"[1:]
+            num.append("{i}-{month}")
+    print(num)
     print("----------------------------")
 
 
