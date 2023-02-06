@@ -18,7 +18,7 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
     for i in [2019, 2020, 2021, 2022]:
         for j in range(1, 13):
             month = f"0{j}"[1:]
-            num.append("{i}-{month}")
+            num.append(f"{i}-{month}")
     print(num)
     print("----------------------------")
 
