@@ -6,7 +6,7 @@ from airflow.operators.python import PythonOperator
 
 def _download(**context):
     print("----------------------------")
-    print(context)
+    print(context['logical_date'])
     print("----------------------------")
 
 
