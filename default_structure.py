@@ -47,6 +47,7 @@ with DAG(
         retries=3
     )
     
+    # <task_id>.doc_md : task에 대한 문서 정의
     t1.doc_md = dedent(
         """\
     #### Task Documentation
@@ -57,8 +58,7 @@ with DAG(
 
     """
     )
-
-    # <task_id>.doc_md : task에 대한 문서 정의
+    
     # <dag_id>.doc_md : dag에 대한 문서 정의
     dag.doc_md = __doc__ 
     dag.doc_md = """
