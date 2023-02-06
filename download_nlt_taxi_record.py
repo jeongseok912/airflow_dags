@@ -28,7 +28,7 @@ with DAG(
             "month": "{{ execution_date.month.in_timezone('Asia/Seoul') }}",
             "day": "{{ execution_date.day.in_timezone('Asia/Seoul') }}",
             "hour": "{{ execution_date.hour.in_timezone('Asia/Seoul') }}",
-        }
+        },
         provide_context=True
     )
 
