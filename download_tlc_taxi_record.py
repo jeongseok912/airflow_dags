@@ -47,7 +47,7 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
 
 
 with DAG(
-    'download_nlt_taxi_record',
+    'download_tlc_taxi_record',
     start_date=datetime(2022, 2, 6),
     schedule_interval=None,
 ) as dag:
