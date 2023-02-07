@@ -1,10 +1,24 @@
 from datetime import datetime
+import pymysql
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
 
-# https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2019-02.parquet
+#
+def get_meta_log():
+    conn = pymysql.connect(
+        host='localhost',
+        user='bradley',
+        password='123qwe!@#QWE',
+        db='tlc_taxi'
+    )
+
+    cur = conn.cursor()
+
+    sql = 'SELECT * FROM dataset_meta;'
+    return cur.execute(sql)
+
 
 def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
     print("----------------------------")
@@ -17,19 +31,18 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
         for j in range(1, 13):
             month = f"0{j}"[-2:]
             year_month.append(f"{i}-{month}")
-    year_month = year_month[1:]  # 2019년 2월부터 FHVHV 데이터 존재
-    print(year_month)
-    print(len(year_month))
-    print(ts / len(year_month))
-    for i in range(1675682263, 1675682315):
-        print(i / len(year_month))
 
-    print("**************************************")
-    while True:
-        if ts / 47 == 0:
-            print(ts)
-            break
-        ts -= 1
+    # mongodb metafh 변경
+    year_month = year_month[1:]  # 2019년 2월부터 FHVHV 데이터 존재
+
+    print("******************************************")
+    print(get_meta_log())
+
+    i = 0  # DB에 max(created_at)의 index 값 가져오기
+    print(year_month[i])
+
+    # 1675745379 # 4의 ts 근처 배수
+
     print("----------------------------")
 
 
