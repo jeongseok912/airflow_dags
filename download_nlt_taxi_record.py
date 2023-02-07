@@ -22,7 +22,7 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
     print(len(year_month))
     print(ts / len(year_month))
     for i in range(1675682263, 1675682315):
-        print(i % len(year_month))
+        print(i / len(year_month))
     print("----------------------------")
 
 
