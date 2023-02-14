@@ -17,7 +17,9 @@ def get_meta_log():
     cur = conn.cursor()
 
     sql = 'SELECT * FROM dataset_meta;'
-    return cur.execute(sql)
+    cur.execute(sql)
+    result = cur.fetchall()
+    return result
 
 
 def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
@@ -36,7 +38,7 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
     year_month = year_month[1:]  # 2019년 2월부터 FHVHV 데이터 존재
 
     print("******************************************")
-    print(get_meta_log())
+    print("selected dataset: ", get_meta_log())
 
     i = 0  # DB에 max(created_at)의 index 값 가져오기
     print(year_month[i])
