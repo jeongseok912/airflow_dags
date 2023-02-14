@@ -56,7 +56,8 @@ with DAG(
 
     t1 = MySqlOperator(
         'select dataset_meta table',
-        mysql_conn_id=sql="SELECT * FROM dataset_meta;"
+        mysql_conn_id="airflow_metadb",
+        sql="SELECT * FROM dataset_meta;"
     )
 
     t2 = PythonOperator(
