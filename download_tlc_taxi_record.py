@@ -1,15 +1,14 @@
 from datetime import datetime
-# import pymysql
+import pymysql
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.mysql.operators.mysql import MySqlOperator
 
 
-'''
 def get_meta_log():
     conn = pymysql.connect(
-        host='localhost',
+        host='172.23.133.76',
         user='bradley',
         password='123qwe!@#QWE',
         db='tlc_taxi'
@@ -19,7 +18,6 @@ def get_meta_log():
 
     sql = 'SELECT * FROM dataset_meta;'
     return cur.execute(sql)
-'''
 
 
 def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
@@ -38,7 +36,7 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
     year_month = year_month[1:]  # 2019년 2월부터 FHVHV 데이터 존재
 
     print("******************************************")
-    # print(get_meta_log())
+    print(get_meta_log())
 
     i = 0  # DB에 max(created_at)의 index 값 가져오기
     print(year_month[i])
@@ -53,12 +51,13 @@ with DAG(
     start_date=datetime(2022, 2, 6),
     schedule_interval=None,
 ) as dag:
-
+    '''
     t1 = MySqlOperator(
         'select dataset_meta table',
         mysql_conn_id="airflow_metadb",
         sql="SELECT * FROM dataset_meta;"
     )
+    '''
 
     t2 = PythonOperator(
         task_id="download",
