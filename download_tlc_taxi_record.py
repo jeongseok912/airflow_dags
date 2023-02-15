@@ -51,12 +51,12 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
 with DAG(
     'download_tlc_taxi_record',
     start_date=datetime(2022, 2, 6),
+    default_args={"mysql_conn_id": "mysql_conn_id="AIRFLOW_CONN_NLC_TAXI"},
     schedule_interval=None,
 ) as dag:
 
     t1 = MySqlOperator(
         'select dataset_meta',
-        mysql_conn_id="AIRFLOW_CONN_NLC_TAXI",
         sql="SELECT * FROM dataset_meta"
     )
 
