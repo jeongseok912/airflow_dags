@@ -42,7 +42,7 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
 
     i = 0  # DB에 max(created_at)의 index 값 가져오기
     print(year_month[i])
-    print(context)
+    print(context["run_id"])
 
     # 1675745379 # 4의 ts 근처 배수
 
