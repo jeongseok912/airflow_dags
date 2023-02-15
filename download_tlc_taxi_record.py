@@ -42,6 +42,7 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
 
     i = 0  # DB에 max(created_at)의 index 값 가져오기
     print(year_month[i])
+    print(context)
 
     # 1675745379 # 4의 ts 근처 배수
 
@@ -56,7 +57,7 @@ with DAG(
 
     t1 = MySqlOperator(
         task_id='select_dataset_meta',
-        mysql_conn_id='AIRFLOW_CONN_TLC_TAXI',
+        mysql_conn_id='TLC_TAXI',
         sql="SELECT * FROM dataset_meta;"
     )
 
