@@ -8,7 +8,7 @@ from airflow.providers.mysql.operators.mysql import MySqlOperator
 
 def get_meta_log():
     conn = pymysql.connect(
-        host='172.23.133.76',
+        host='172.23.138.8',
         user='bradley',
         password='123qwe!@#QWE',
         db='tlc_taxi'
