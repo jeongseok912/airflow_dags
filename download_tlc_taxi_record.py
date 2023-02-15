@@ -56,8 +56,8 @@ with DAG(
 ) as dag:
 
     t1 = MySqlOperator(
-        task_id='select_dataset_meta',
-        sql=r"""SELECT * FROM dataset_meta;"""
+        'select_dataset_meta',
+        sql="SELECT * FROM dataset_meta;"
     )
 
     t2 = PythonOperator(
