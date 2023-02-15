@@ -57,7 +57,7 @@ with DAG(
     t1 = MySqlOperator(
         'select dataset_meta',
         mysql_conn_id="AIRFLOW_CONN_NLC_TAXI",
-        sql="SELECT * FROM dataset_meta;"
+        sql="SELECT * FROM dataset_meta"
     )
 
     t2 = PythonOperator(
