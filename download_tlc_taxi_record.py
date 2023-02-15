@@ -53,13 +53,12 @@ with DAG(
     start_date=datetime(2022, 2, 6),
     schedule_interval=None,
 ) as dag:
-    '''
+
     t1 = MySqlOperator(
-        'select dataset_meta table',
-        mysql_conn_id="airflow_metadb",
+        'select dataset_meta',
+        mysql_conn_id="AIRFLOW_CONN_NLC_TAXI",
         sql="SELECT * FROM dataset_meta;"
     )
-    '''
 
     t2 = PythonOperator(
         task_id="download",
@@ -77,4 +76,4 @@ with DAG(
         provide_context=True
     )
 
-t2
+t1 >> t2
