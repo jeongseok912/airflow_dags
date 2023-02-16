@@ -47,16 +47,13 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     s3 = boto3.client("s3", aws_access_key_id=aws_access_key_id,
                       aws_secret_access_key=aws_secret_access_key)
     bucket = "tlc-taxi"
-    key = f"download/{file_name}"
+    dir = file_name.split("-")[0].split("_")
+    print(dir)
+    key = f"{dir}/{file_name}"
 
     print("S3 업로드 시작")
-    '''
-    bucket_list = s3.list_buckets()
-    print(bucket_list)
-    for b in bucket_list['Buckets']:
-        print(b)
-    '''
-    s3.put_object(Bucket=bucket, Key=key, Body=response.content)
+
+    # s3.put_object(Bucket=bucket, Key=key, Body=response.content)
     print("S3 업로드 완료")
 
     # upload_file if you want a simple API or you are uploading large files (>5GB) to your S3 bucket.
