@@ -49,6 +49,7 @@ class CustomHandler(logging.StreamHandler):
             print("****************************")
             self.db.execute(
                 f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
+            print("****************************")
             # self.db.execute_query(f"INSERT INTO LOGS VALUES ('{record.filename}', '{record.funcName}', '{record.lineno}', '{record.msg}', SYSDATE());")
 
 
@@ -77,6 +78,7 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
         raise Exception(f"다운로드 실패: {url}")
     '''
     print(f"다운로드 완료: {url}")
+    logger.info("download success")
     logger.info("다운로드 성공")
 
     # upload to s3
