@@ -43,15 +43,10 @@ class CustomHandler(logging.StreamHandler):
 
     def emit(self, record):
         if record:
-            tables = self.cursor.execute("show tables;")
-            print("****************************")
-            res = self.cursor.execute("SELECT * FROM log;")
-
             print("****************************")
             self.cursor.execute(
-                "INSERT INTO log (message) VALUES ('download successed efefef');")
+                f"INSERT INTO log (message) VALUES ('{record.msg}');")
 
-            # {record.msg}
             self.db.commit()
             print("****************************")
             # self.db.execute_query(f"INSERT INTO LOGS VALUES ('{record.filename}', '{record.funcName}', '{record.lineno}', '{record.msg}', SYSDATE());")
