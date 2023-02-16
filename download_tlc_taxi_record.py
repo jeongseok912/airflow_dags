@@ -42,7 +42,7 @@ class CustomHandler(logging.StreamHandler):
 
     def emit(self, record):
         if record:
-            self.db.cursor.execute(
+            self.db.cursor().execute(
                 f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
             # self.db.execute_query(f"INSERT INTO LOGS VALUES ('{record.filename}', '{record.funcName}', '{record.lineno}', '{record.msg}', SYSDATE());")
 
