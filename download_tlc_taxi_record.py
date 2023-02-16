@@ -56,6 +56,7 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     hook = MySqlHook.get_hook(conn_id="TLC_TAXI_LOG")
     conn = hook.get_conn()
     db = conn.cursor()
+    print(db)
 
     customhandler = CustomHandler(db)
     logger.addHandler(customhandler)
