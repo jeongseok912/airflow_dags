@@ -40,8 +40,8 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     # logging
 
     # upload to s3
-    s3 = boto3.client("s3", aws_access_key_id="AKIAV4AH2N4L753EZDUC",
-                      aws_secret_access_key="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")
+    s3 = boto3.client("s3", aws_access_key_id="",
+                      aws_secret_access_key="")
     bucket = "tlc_taxi"
     key = f"download/{file_name}"
 
