@@ -40,14 +40,14 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     file_name = url.split("/")[-1]
 
     # download dataset
+    logger.info("다운로드 시작: {url}")
     '''
     response = requests.get(url)
     if response.status_code != 200:
         logger.error("다운로드 실패")
         raise Exception(f"다운로드 실패: {url}")
     '''
-    print(f"다운로드 완료: {url}")
-    logger.info("download success.")
+    logger.info(f"다운로드 완료: {url}")
 
     # upload to s3
     aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
@@ -59,9 +59,9 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     dir = file_name.split("-")[0].split("_")[-1]
     key = f"{dir}/{file_name}"
 
-    logger.info("S3 upload started.")
+    logger.info("S3 업로드 시작")
     # s3.put_object(Bucket=bucket, Key=key, Body=response.content)
-    logger.info("S3 upload finished.")
+    logger.info("S3 업로드 완료")
 
     dbhandler.close()
 
