@@ -21,7 +21,7 @@ class DBHandler(logging.StreamHandler):
             self.cursor.execute(
                 f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
 
-    def close():
+    def close(self):
         self.conn.commit()
         self.cursor.close()
         self.conn.close()
