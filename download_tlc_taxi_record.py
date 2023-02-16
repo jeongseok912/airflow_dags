@@ -1,11 +1,13 @@
 from datetime import datetime
-import pymysql
+# import pymysql
+import requests
+import boto3
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.mysql.operators.mysql import MySqlOperator
 
-
+'''
 def get_meta_log():
     conn = pymysql.connect(
         host='172.23.138.8',
@@ -20,10 +22,28 @@ def get_meta_log():
     cur.execute(sql)
     result = cur.fetchall()
     return result
+'''
 
 
-def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
+def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
     print("----------------------------")
+    # get next index's dataset link of lasted index
+    url = "https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2019-02.parquet"
+
+    # download dataset
+    response = requests.get(url)
+
+    # logging
+
+    # upload to s3
+    s3 = boto3.client("s3")
+    bucket = "tlc_taxi"
+    key = url.split("/")[-1]
+
+    # upload_file if you want a simple API or you are uploading large files (>5GB) to your S3 bucket.
+    # put_object if you need additional configurability like setting the ACL on the uploaded object
+    s3.upload_file(response, bucket, key)
+    '''
     print(context['logical_date'].strftime('%Y-%m-%d'))
     ts = context["logical_date"].timestamp()
     print(int(ts))
@@ -37,15 +57,15 @@ def _download(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **co
     # mongodb metafh 변경
     year_month = year_month[1:]  # 2019년 2월부터 FHVHV 데이터 존재
 
-    print("******************************************")
-    print("selected dataset: ", get_meta_log())
+    # print("******************************************")
+    # print("selected dataset: ", get_meta_log())
 
     i = 0  # DB에 max(created_at)의 index 값 가져오기
     print(year_month[i])
     print(context["run_id"])
 
     # 1675745379 # 4의 ts 근처 배수
-
+    '''
     print("----------------------------")
 
 
@@ -62,8 +82,8 @@ with DAG(
     )
 
     t2 = PythonOperator(
-        task_id="download",
-        python_callable=_download,
+        task_id="download_dataset",
+        python_callable=download_and_upload_s3,
         op_kwargs={
             "year": "{{ execution_date.in_timezone('Asia/Seoul').year }}",
             "month": "{{ execution_date.in_timezone('Asia/Seoul').month }}",
