@@ -44,6 +44,7 @@ class CustomHandler(logging.StreamHandler):
         if record:
             print("****************************")
             print(self.db.execute("show tables;"))
+            print(self.db.execute("SELECT * FROM log;"))
             print("****************************")
             self.db.execute(
                 f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
