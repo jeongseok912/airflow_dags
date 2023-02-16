@@ -39,20 +39,20 @@ class CustomHandler(logging.StreamHandler):
     def __init__(self, db):
         super().__init__()
         self.db = db
+        self.cursor = db.cursor()
 
     def emit(self, record):
         if record:
             tables = self.db.execute("show tables;")
-            print(tables)
             print("****************************")
-            res = self.db.execute("SELECT * FROM log;")
-            re = res.fetchall()
-            for r in re:
-                print(r)
+            res = self.cursor.execute("SELECT * FROM log;")
+
             print("****************************")
-            self.db.execute(
+            self.cursor.execute(
                 "INSERT INTO log (message) VALUES ('download successed efefef');")
+
             # {record.msg}
+            self.db.commit()
             print("****************************")
             # self.db.execute_query(f"INSERT INTO LOGS VALUES ('{record.filename}', '{record.funcName}', '{record.lineno}', '{record.msg}', SYSDATE());")
 
@@ -64,8 +64,7 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
 
     # db = Connect_DB()
     hook = MySqlHook.get_hook(conn_id="TLC_TAXI_LOG")
-    conn = hook.get_conn()
-    db = conn.cursor()
+    db = hook.get_conn()
 
     customhandler = CustomHandler(db)
     logger.addHandler(customhandler)
