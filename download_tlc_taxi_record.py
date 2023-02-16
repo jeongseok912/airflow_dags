@@ -6,6 +6,7 @@ import boto3
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.mysql.operators.mysql import MySqlOperator
+from airflow.models import Variable
 
 '''
 def get_meta_log():
@@ -40,8 +41,10 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     # logging
 
     # upload to s3
-    s3 = boto3.client("s3", aws_access_key_id="",
-                      aws_secret_access_key="")
+    aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key = Variable.get("AWS_SECRET_ACCESS_KEY")
+    s3 = boto3.client("s3", aws_access_key_id=aws_access_key_id,
+                      aws_secret_access_key=aws_secret_access_key)
     bucket = "tlc_taxi"
     key = f"download/{file_name}"
 
