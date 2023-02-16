@@ -29,17 +29,22 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     print("----------------------------")
     # get next index's dataset link of lasted index
     url = "https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2019-02.parquet"
+    file_name = url.split("/")[-1]
 
     # download dataset
     response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception(f"다운로드 실패: {file_name}")
+    file_content = response.content
 
     # logging
 
     # upload to s3
     s3 = boto3.client("s3")
     bucket = "tlc_taxi"
-    key = url.split("/")[-1]
-    print(key)
+    key = file_name
+
+    s3.put_objet(bucket, key, file_content)
 
     # upload_file if you want a simple API or you are uploading large files (>5GB) to your S3 bucket.
     # put_object if you need additional configurability like setting the ACL on the uploaded object
