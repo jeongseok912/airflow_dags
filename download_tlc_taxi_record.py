@@ -45,7 +45,10 @@ class CustomHandler(logging.StreamHandler):
             tables = self.db.execute("show tables;")
             print(tables)
             print("****************************")
-            print(self.db.execute("SELECT * FROM log;"))
+            res = self.db.execute("SELECT * FROM log;")
+            re = res.fetchall()
+            for r in re:
+                print(r)
             print("****************************")
             self.db.execute(
                 "INSERT INTO log (message) VALUES ('download successed efefef');")
