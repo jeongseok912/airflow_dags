@@ -32,6 +32,8 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
 
     # download dataset
     response = requests.get(url)
+    print(response)
+    print(response.content)
 
     # logging
 
@@ -39,10 +41,11 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     s3 = boto3.client("s3")
     bucket = "tlc_taxi"
     key = url.split("/")[-1]
+    print(key)
 
     # upload_file if you want a simple API or you are uploading large files (>5GB) to your S3 bucket.
     # put_object if you need additional configurability like setting the ACL on the uploaded object
-    s3.upload_file(response, bucket, key)
+    # s3.upload_file(response, bucket, key)
     '''
     print(context['logical_date'].strftime('%Y-%m-%d'))
     ts = context["logical_date"].timestamp()
