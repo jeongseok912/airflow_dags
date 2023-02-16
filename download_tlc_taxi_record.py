@@ -1,44 +1,77 @@
 from datetime import datetime
-# import pymysql
 import requests
 import boto3
+import logging
+# import mysql.connector
+# from mysql.connector import Error
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.mysql.operators.mysql import MySqlOperator
+from airflow.providers.mysql.operators.mysql import MySqlOperator, MySqlHook
 from airflow.models import Variable
 
 '''
-def get_meta_log():
-    conn = pymysql.connect(
-        host='172.23.138.8',
-        user='bradley',
-        password='123qwe!@#QWE',
-        db='tlc_taxi'
-    )
+class Connect_DB():
+    def __init__(self):
+        try:
+            self.connection = mysql.connector.connect(
+                host='172.23.138.8',
+                user='bradley',
+                password='123qwe!@#QWE',
+                database='tlc_taxi'
+            )
+            if self.connection.is_connected():
+                self.cursor = self.connection.cursor()
+        except Error as e:
+            print(f"Can't connect to the db {e}")
 
-    cur = conn.cursor()
+    def execute_query(self, sql):
+        self.cursor.execute(sql)
 
-    sql = 'SELECT * FROM dataset_meta;'
-    cur.execute(sql)
-    result = cur.fetchall()
-    return result
+    def close(self):
+        self.connection.commit()
+        self.cursor.close()
+        self.connection.close()
 '''
+
+
+class CustomHandler(logging.StreamHandler):
+    def __init__(self, db):
+        super().__init__()
+        self.db = db
+
+    def emit(self, record):
+        if record:
+            self.db.cursor.execute(
+                f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
+            # self.db.execute_query(f"INSERT INTO LOGS VALUES ('{record.filename}', '{record.funcName}', '{record.lineno}', '{record.msg}', SYSDATE());")
 
 
 def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
     print("----------------------------")
+    logger = logging.Logger("dataset_meta_logger")
+    logger.setLevel(logging.INFO)
+
+    # db = Connect_DB()
+    hook = MySqlHook.get_hook(conn_id="TLC_TAXI_LOG")
+    db = hook.get_conn()
+
+    customhandler = CustomHandler(db)
+    logger.addHandler(customhandler)
+
     # get next index's dataset link of lasted index
     url = "https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2019-02.parquet"
     file_name = url.split("/")[-1]
 
     # download dataset
+    '''
     response = requests.get(url)
     if response.status_code != 200:
+        logger.error("다운로드 실패")
         raise Exception(f"다운로드 실패: {url}")
+    '''
     print(f"다운로드 완료: {url}")
-
-    # logging
+    logger.info("다운로드 성공")
 
     # upload to s3
     aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
@@ -52,8 +85,10 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
 
     print("S3 업로드 시작")
 
-    s3.put_object(Bucket=bucket, Key=key, Body=response.content)
+    # s3.put_object(Bucket=bucket, Key=key, Body=response.content)
     print("S3 업로드 완료")
+
+    db.close()
 
     # upload_file if you want a simple API or you are uploading large files (>5GB) to your S3 bucket.
     # put_object if you need additional configurability like setting the ACL on the uploaded object
