@@ -42,7 +42,7 @@ class CustomHandler(logging.StreamHandler):
 
     def emit(self, record):
         if record:
-            self.db.cursor().execute(
+            self.db.execute(
                 f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
             # self.db.execute_query(f"INSERT INTO LOGS VALUES ('{record.filename}', '{record.funcName}', '{record.lineno}', '{record.msg}', SYSDATE());")
 
@@ -54,7 +54,8 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
 
     # db = Connect_DB()
     hook = MySqlHook.get_hook(conn_id="TLC_TAXI_LOG")
-    db = hook.get_conn()
+    conn = hook.get_conn()
+    db = conn.cursor()
 
     customhandler = CustomHandler(db)
     logger.addHandler(customhandler)
