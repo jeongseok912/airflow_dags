@@ -49,7 +49,7 @@ class CustomHandler(logging.StreamHandler):
 
 def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
     print("----------------------------")
-    logger = logging.Logger("dataset_meta_logger")
+    logger = logging.getLogger("dataset_meta_logger")
     logger.setLevel(logging.INFO)
 
     # db = Connect_DB()
