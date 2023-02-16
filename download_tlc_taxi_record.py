@@ -42,13 +42,9 @@ class CustomHandler(logging.StreamHandler):
 
     def emit(self, record):
         if record:
-            print("****************************")
             tables = self.db.execute("show tables;")
             print(tables)
-            for t in tables:
-                print("반복문")
-                print(t)
-            print("반복문 끝")
+            print("****************************")
             print(self.db.execute("SELECT * FROM log;"))
             print("****************************")
             self.db.execute(
