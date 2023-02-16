@@ -32,8 +32,6 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
 
     # download dataset
     response = requests.get(url)
-    print(response)
-    print(response.content)
 
     # logging
 
