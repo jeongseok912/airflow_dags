@@ -34,8 +34,8 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     # download dataset
     response = requests.get(url)
     if response.status_code != 200:
-        raise Exception(f"다운로드 실패: {file_name}")
-    print(f"다운로드 완료: {file_name}")
+        raise Exception(f"다운로드 실패: {url}")
+    print(f"다운로드 완료: {url}")
     file_content = response.content
 
     # logging
@@ -46,7 +46,7 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     key = file_name
 
     print("S3 업로드 시작")
-    s3.put_object(bucket, key, file_content)
+    s3.put_object(Bucket=bucket, Key=key, Body=file_content)
     print("S3 업로드 완료")
 
     # upload_file if you want a simple API or you are uploading large files (>5GB) to your S3 bucket.
