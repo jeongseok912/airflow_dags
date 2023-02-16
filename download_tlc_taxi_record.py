@@ -48,7 +48,7 @@ class CustomHandler(logging.StreamHandler):
             print(self.db.execute("SELECT * FROM log;"))
             print("****************************")
             self.db.execute(
-                f"INSERT INTO log (message) VALUES ('download successed');")
+                "INSERT INTO log (message) VALUES ('download successed efefef');")
             # {record.msg}
             print("****************************")
             # self.db.execute_query(f"INSERT INTO LOGS VALUES ('{record.filename}', '{record.funcName}', '{record.lineno}', '{record.msg}', SYSDATE());")
