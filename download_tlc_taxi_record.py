@@ -33,12 +33,10 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     file_name = url.split("/")[-1]
 
     # download dataset
-    '''
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"다운로드 실패: {url}")
     print(f"다운로드 완료: {url}")
-    '''
 
     # logging
 
@@ -49,13 +47,12 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     s3 = boto3.client("s3", aws_access_key_id=aws_access_key_id,
                       aws_secret_access_key=aws_secret_access_key)
     bucket = "tlc-taxi"
-    dir = file_name.split("-")[0].split("_")
-    print(dir)
+    dir = file_name.split("-")[0].split("_")[-1]
     key = f"{dir}/{file_name}"
 
     print("S3 업로드 시작")
 
-    # s3.put_object(Bucket=bucket, Key=key, Body=response.content)
+    s3.put_object(Bucket=bucket, Key=key, Body=response.content)
     print("S3 업로드 완료")
 
     # upload_file if you want a simple API or you are uploading large files (>5GB) to your S3 bucket.
