@@ -33,10 +33,12 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     file_name = url.split("/")[-1]
 
     # download dataset
+    '''
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"다운로드 실패: {url}")
     print(f"다운로드 완료: {url}")
+    '''
 
     # logging
 
