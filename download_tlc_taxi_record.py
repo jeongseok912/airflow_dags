@@ -39,11 +39,11 @@ class CustomHandler(logging.StreamHandler):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.cursor = db.cursor()
+        self.cursor = self.db.cursor()
 
     def emit(self, record):
         if record:
-            tables = self.db.execute("show tables;")
+            tables = self.cursor.execute("show tables;")
             print("****************************")
             res = self.cursor.execute("SELECT * FROM log;")
 
