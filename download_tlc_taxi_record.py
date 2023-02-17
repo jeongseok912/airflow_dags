@@ -93,6 +93,11 @@ def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, ut
 
 
 get_latest_dataset_link_sql = """
+    SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY);
+    """
+
+'''
+get_latest_dataset_link_sql = """
     "SELECT 
         dataset_link 
     FROM dataset_meta 
@@ -100,9 +105,10 @@ get_latest_dataset_link_sql = """
         SELECT 
             MAX(dataset_id) 
         FROM dataset_log 
-        WHERE logical_date = SELECT DATE_SUB(CURDATE(), INTERVAL  1 DAY);
+        WHERE logical_date = SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY);
     );
     """
+'''
 
 with DAG(
     'download_tlc_taxi_record',
