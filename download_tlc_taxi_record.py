@@ -12,7 +12,7 @@ from airflow.models import Variable
 class DBHandler(logging.StreamHandler):
     def __init__(self):
         super().__init__()
-        self.hook = MySqlHook.get_hook(conn_id="TLC_TAXI_LOG")
+        self.hook = MySqlHook.get_hook(conn_id="TLC_TAXI")
         self.conn = self.hook.get_conn()
         self.cursor = self.conn.cursor()
 
