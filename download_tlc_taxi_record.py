@@ -27,7 +27,7 @@ class DBHandler(logging.StreamHandler):
         self.conn.close()
 
 
-def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
+def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
     print("----------------------------")
     logger = logging.getLogger("dataset")
     logger.setLevel(logging.INFO)
@@ -63,11 +63,9 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     # s3.put_object(Bucket=bucket, Key=key, Body=response.content)
     logger.info("S3 업로드 완료")
 
-    dbhandler.close()
+    logger.info(url)
 
-    # upload_file if you want a simple API or you are uploading large files (>5GB) to your S3 bucket.
-    # put_object if you need additional configurability like setting the ACL on the uploaded object
-    # s3.upload_file(response, bucket, key)
+    dbhandler.close()
     '''
     print(context['logical_date'].strftime('%Y-%m-%d'))
     ts = context["logical_date"].timestamp()
@@ -94,21 +92,33 @@ def download_and_upload_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc
     print("----------------------------")
 
 
+get_latest_dataset_link_sql = """
+    "SELECT 
+        dataset_link 
+    FROM dataset_meta 
+    WHERE id = (
+        SELECT 
+            MAX(dataset_id) 
+        FROM dataset_log 
+        WHERE logical_date = SELECT DATE_SUB(CURDATE(), INTERVAL  1 DAY);
+    );
+    """
+
 with DAG(
     'download_tlc_taxi_record',
     start_date=datetime(2022, 2, 6),
     schedule_interval=None,
 ) as dag:
 
-    t1 = MySqlOperator(
-        task_id='select_dataset_meta',
+    get_latest_dataset_id = MySqlOperator(
+        task_id='get_latest_dataset_id',
         mysql_conn_id='TLC_TAXI',
-        sql="SELECT * FROM dataset_meta;"
+        sql=get_latest_dataset_link_sql
     )
 
-    t2 = PythonOperator(
-        task_id="download_dataset",
-        python_callable=download_and_upload_s3,
+    download_dataset_and_upload_to_s3 = PythonOperator(
+        task_id="download_dataset_and_upload_to_s3",
+        python_callable=download_dataset_and_upload_to_s3,
         op_kwargs={
             "year": "{{ execution_date.in_timezone('Asia/Seoul').year }}",
             "month": "{{ execution_date.in_timezone('Asia/Seoul').month }}",
@@ -122,4 +132,4 @@ with DAG(
         provide_context=True
     )
 
-t1 >> t2
+get_latest_dataset_id >> download_dataset_and_upload_to_s3
