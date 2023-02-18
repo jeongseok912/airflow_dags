@@ -30,19 +30,26 @@ class DBHandler(logging.StreamHandler):
         self.conn.close()
 
 
-sql_get_latest_dataset_link = """
+sql_get_latest_dataset_id = """
     SELECT 
-        dataset_link 
-    FROM dataset_meta 
-    WHERE id = (
-        SELECT 
-            MAX(dataset_id) 
-        FROM dataset_log 
-        WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY))
+        MAX(dataset_id) 
+    FROM dataset_log 
+    WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY))
     );
     """
 
 sql_get_first_dataset_link = "SELECT dataset_link FROM dataset_meta WHERE id = 1;"
+
+
+def get_latest_dataset_id(**context):
+    db = DBHandler()
+    id = db.select(sql_get_latest_dataset_id)
+    if id is None:
+        id = 1
+
+    db.close()
+
+    return id
 
 
 def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
@@ -54,11 +61,7 @@ def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, ut
     logger.addHandler(dbhandler)
 
     # get next index's dataset link of lasted index
-    url = dbhandler.select(sql_get_latest_dataset_link)
-    if url is None:
-        url = dbhandler.select(sql_get_first_dataset_link)[0]
     file_name = url.split("/")[-1]
-
     print(url)
     print("********************************************")
 
@@ -97,10 +100,9 @@ with DAG(
     schedule_interval=None,
 ) as dag:
 
-    get_latest_dataset_id = MySqlOperator(
-        task_id='get_latest_dataset_id',
-        mysql_conn_id='TLC_TAXI',
-        sql=sql_get_latest_dataset_link
+    get_latest_dataset_id = PythonOperator(
+        task_id="get_latest_dataset_id",
+        python_callable=get_latest_dataset_id
     )
 
     download_dataset_and_upload_to_s3 = PythonOperator(
