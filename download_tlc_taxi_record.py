@@ -9,11 +9,16 @@ from airflow.providers.mysql.operators.mysql import MySqlOperator, MySqlHook
 from airflow.models import Variable
 
 
-get_latest_dataset_link_sql = """
+sql_get_latest_dataset_link = """
+    SELECT 
+        dataset_link 
+    FROM dataset_meta 
+    WHERE id = (
         SELECT 
             MAX(dataset_id) 
         FROM dataset_log 
-        WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY));
+        WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY))
+    );
     """
 
 
@@ -30,7 +35,7 @@ class DBHandler(logging.StreamHandler):
                 f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
 
     def select(self):
-        return self.hook.get_records(get_latest_dataset_link_sql)
+        return self.hook.get_records(sql_get_latest_dataset_link)
 
     def close(self):
         self.conn.commit()
@@ -82,21 +87,6 @@ def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, ut
     dbhandler.close()
 
 
-'''
-get_latest_dataset_link_sql = """
-    "SELECT 
-        dataset_link 
-    FROM dataset_meta 
-    WHERE id = (
-        SELECT 
-            MAX(dataset_id) 
-        FROM dataset_log 
-        WHERE logical_date = SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY);
-    );
-    """
-'''
-
-
 with DAG(
     'download_tlc_taxi_record',
     start_date=datetime(2022, 2, 6),
@@ -106,7 +96,7 @@ with DAG(
     get_latest_dataset_id = MySqlOperator(
         task_id='get_latest_dataset_id',
         mysql_conn_id='TLC_TAXI',
-        sql=get_latest_dataset_link_sql
+        sql=sql_get_latest_dataset_link
     )
 
     download_dataset_and_upload_to_s3 = PythonOperator(
