@@ -117,16 +117,16 @@ def download_and_upload(url, year, month, day, hour, minute, utc_dt, utc_hour, u
     dbhandler.close()
 
 
-async def gather(**context):
-    urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
-
+async def gather(urls):
     async with aiohttp.ClientSession() as session:
         await asyncio.gather(*[download_and_upload(url) for url in urls])
 
 
-def async_download_upload():
+def async_download_upload(**context):
+    urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
+
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(gather())
+    loop.run_until_complete(gather(urls))
     loop.close()
 
 
