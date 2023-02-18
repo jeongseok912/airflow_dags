@@ -101,7 +101,7 @@ def download_and_upload(url, logger):
 
     logger.info(f"S3 업로드 시작 - {url}")
     # s3.put_object(Bucket=bucket, Key=key, Body=response.content)
-    logger.info("S3 업로드 완료 - {url}")
+    logger.info(f"S3 업로드 완료 - {url}")
 
 
 async def gather(urls):
@@ -112,7 +112,7 @@ async def gather(urls):
     logger.addHandler(dbhandler)
 
     async with aiohttp.ClientSession() as session:
-        await asyncio.gather(*[download_and_upload(url, logger) for url in urls])
+        await asyncio.gather(*[asyncio.ensure_future(download_and_upload(url, logger)) for url in urls])
 
     dbhandler.close()
 
