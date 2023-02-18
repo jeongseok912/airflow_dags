@@ -152,7 +152,7 @@ with DAG(
     )
     async_download_upload = PythonOperator(
         task_id="async_download_upload",
-        python_callable=async_download_upload
+        python_callable=async_download_upload,
         provide_context=True
     )
 
