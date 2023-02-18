@@ -75,7 +75,7 @@ def make_dynamic_url(num, **context):
     return urls
 
 
-def download_and_upload(url, year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
+def download_and_upload(url):
     print("----------------------------")
     logger = logging.getLogger("dataset")
     logger.setLevel(logging.INFO)
@@ -152,17 +152,7 @@ with DAG(
     )
     async_download_upload = PythonOperator(
         task_id="async_download_upload",
-        python_callable=async_download_upload,
-        op_kwargs={
-            "year": "{{ execution_date.in_timezone('Asia/Seoul').year }}",
-            "month": "{{ execution_date.in_timezone('Asia/Seoul').month }}",
-            "day": "{{ execution_date.in_timezone('Asia/Seoul').day }}",
-            "hour": "{{ execution_date.in_timezone('Asia/Seoul').hour }}",
-            "minute": "{{ execution_date.in_timezone('Asia/Seoul').minute }}",
-            "utc_dt": "{{ execution_date }}",
-            "utc_hour": "{{ execution_date.hour }}",
-            "utc_minute": "{{ execution_date.minute }}"
-        },
+        python_callable=async_download_upload
         provide_context=True
     )
 
