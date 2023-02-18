@@ -77,21 +77,17 @@ def make_dynamic_url(num, **context):
 
 def download_and_upload(url, logger):
     print("----------------------------")
-
-    # get next index's dataset link of lasted index
     file_name = url.split("/")[-1]
-    print(url)
-    print("********************************************")
 
     # download dataset
-    logger.info(f"다운로드 시작: {url}")
+    logger.info(f"다운로드 시작 - {url}")
     '''
     response = requests.get(url)
     if response.status_code != 200:
         logger.error("다운로드 실패")
         raise Exception(f"다운로드 실패: {url}")
     '''
-    logger.info(f"다운로드 완료: {url}")
+    logger.info(f"다운로드 완료 - {url}")
 
     # upload to s3
     aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
@@ -103,11 +99,9 @@ def download_and_upload(url, logger):
     dir = file_name.split("-")[0].split("_")[-1]
     key = f"{dir}/{file_name}"
 
-    logger.info("S3 업로드 시작")
+    logger.info(f"S3 업로드 시작 - {url}")
     # s3.put_object(Bucket=bucket, Key=key, Body=response.content)
-    logger.info("S3 업로드 완료")
-
-    logger.info(url)
+    logger.info("S3 업로드 완료 - {url}")
 
 
 async def gather(urls):
