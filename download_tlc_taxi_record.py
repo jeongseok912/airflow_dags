@@ -21,7 +21,7 @@ class DBHandler(logging.StreamHandler):
     def emit(self, record):
         if record:
             self.cursor.execute(
-                f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
+                f"INSERT INTO dataset_log (message, created_at) VALUES ('{record.msg}', SYSDATE());")
 
     def select(self, sql):
         return self.hook.get_records(sql)
