@@ -50,23 +50,18 @@ def get_latest_dataset_id():
 def make_dynamic_url(num, **context):
     db = DBHandler()
     id = context['ti'].xcom_pull(task_ids='get_latest_dataset_id')
-    urls = []
+    print(f"id: {id}")
 
     if id == 1:
-        urls.append(db.select(
+        db.close()
+        return db.select(
             f"SELECT dataset_link FROM dataset_meta WHERE id <= {num};"
         )
-        )
     else:
-        urls.append(db.select(
+        db.close()
+        return db.select(
             f"SELECT dataset_link FROM dataset_meta WHERE id BETWEEN {id + 1} AND {id + (num - 1)};"
         )
-        )
-
-    db.close()
-    print(urls)
-
-    return urls
 
 
 def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
