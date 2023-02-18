@@ -30,25 +30,45 @@ class DBHandler(logging.StreamHandler):
         self.conn.close()
 
 
-sql_get_latest_dataset_id = """
-    SELECT 
-        MAX(dataset_id) 
-    FROM dataset_log 
-    WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY));
-    """
-
-sql_get_first_dataset_link = "SELECT dataset_link FROM dataset_meta WHERE id = 1;"
-
-
 def get_latest_dataset_id():
     db = DBHandler()
-    id = db.select(sql_get_latest_dataset_id)[0]
+    id = db.select("""
+        SELECT 
+            MAX(dataset_id) 
+        FROM dataset_log 
+        WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY));
+        """
+                   )[0]
     if id is None:
         id = 1
 
     db.close()
 
     return id
+
+
+def make_dynamic_url(**context, **kwargs):
+    db = DBHandler()
+    id = context['ti'].xcom_pull(task_ids='get_latest_dataset_id')
+    urls = []
+
+    if id == 1:
+        urls.append(
+            db.select(f"SELECT dataset_link FROM dataset_meta WHERE id = {id};"))
+
+    urls.append(db.select(f"""
+        SELECT
+            dataset_link
+        FROM dataset_meta
+        WHERE id BETWEEN {id + 1} AND {id + (kwargs["num"] - 1)};
+        """
+                          )
+                )
+
+    db.close()
+    print(urls)
+
+    return urls
 
 
 def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
@@ -104,6 +124,13 @@ with DAG(
         python_callable=get_latest_dataset_id
     )
 
+    make_dynamic_url = PythonOperator(
+        task_id="make_dynamic_url",
+        python_callable=make_dynamic_url,
+        op_kwargs={
+            "num": 2
+        }
+    )
     download_dataset_and_upload_to_s3 = PythonOperator(
         task_id="download_dataset_and_upload_to_s3",
         python_callable=download_dataset_and_upload_to_s3,
@@ -120,4 +147,4 @@ with DAG(
         provide_context=True
     )
 
-get_latest_dataset_id >> download_dataset_and_upload_to_s3
+get_latest_dataset_id >> make_dynamic_url >> download_dataset_and_upload_to_s3
