@@ -53,23 +53,15 @@ def make_dynamic_url(num, **context):
     urls = []
 
     if id == 1:
-        urls.append(db.select(f"""
-            SELECT
-                dataset_link
-            FROM dataset_meta
-            WHERE id BETWEEN {id} AND {num};
-            """
-                              )
-                    )
+        urls.append(db.select(
+            f"SELECT dataset_link FROM dataset_meta WHERE id <= {num};"
+        )
+        )
     else:
-        urls.append(db.select(f"""
-            SELECT
-                dataset_link
-            FROM dataset_meta
-            WHERE id BETWEEN {id + 1} AND {id + (num - 1)};
-            """
-                              )
-                    )
+        urls.append(db.select(
+            f"SELECT dataset_link FROM dataset_meta WHERE id BETWEEN {id + 1} AND {id + (num - 1)};"
+        )
+        )
 
     db.close()
     print(urls)
