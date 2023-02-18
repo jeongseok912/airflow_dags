@@ -10,7 +10,10 @@ from airflow.models import Variable
 
 
 get_latest_dataset_link_sql = """
-    SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY);
+        SELECT 
+            MAX(dataset_id) 
+        FROM dataset_log 
+        WHERE logical_date = SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY);
     """
 
 
