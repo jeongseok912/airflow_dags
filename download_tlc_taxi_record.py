@@ -2,6 +2,8 @@ from datetime import datetime
 import requests
 import boto3
 import logging
+import aiohttp
+import asyncio
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -73,7 +75,7 @@ def make_dynamic_url(num, **context):
     return urls
 
 
-def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
+def download_and_upload(url, year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
     print("----------------------------")
     logger = logging.getLogger("dataset")
     logger.setLevel(logging.INFO)
@@ -115,6 +117,19 @@ def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, ut
     dbhandler.close()
 
 
+async def gather(**context):
+    urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
+
+    async with aiohttp.ClientSession() as session:
+        await asyncio.gather(*[download_and_upload(url) for url in urls])
+
+
+def async_download_upload():
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(gather())
+    loop.close()
+
+
 with DAG(
     'download_tlc_taxi_record',
     start_date=datetime(2022, 2, 6),
@@ -135,9 +150,9 @@ with DAG(
             "num": 2
         }
     )
-    download_dataset_and_upload_to_s3 = PythonOperator(
-        task_id="download_dataset_and_upload_to_s3",
-        python_callable=download_dataset_and_upload_to_s3,
+    async_download_upload = PythonOperator(
+        task_id="async_download_upload",
+        python_callable=async_download_upload,
         op_kwargs={
             "year": "{{ execution_date.in_timezone('Asia/Seoul').year }}",
             "month": "{{ execution_date.in_timezone('Asia/Seoul').month }}",
@@ -151,4 +166,4 @@ with DAG(
         provide_context=True
     )
 
-get_latest_dataset_id >> make_dynamic_url >> download_dataset_and_upload_to_s3
+get_latest_dataset_id >> make_dynamic_url >> async_download_upload
