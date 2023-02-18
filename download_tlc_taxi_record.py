@@ -51,6 +51,7 @@ def make_dynamic_url(num, **context):
     db = DBHandler()
     id = context['ti'].xcom_pull(task_ids='get_latest_dataset_id')
     print(f"id: {id}")
+    print(f"num: {num}")
 
     if id == 1:
         db.close()
