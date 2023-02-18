@@ -58,7 +58,7 @@ def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, ut
     if url is None:
         url = dbhandler.select(sql_get_first_dataset_link)
         print(11111111111111111111)
-        print(url)
+        print(url[0])
     file_name = url.split("/")[-1]
 
     print(url)
