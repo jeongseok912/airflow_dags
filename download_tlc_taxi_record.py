@@ -27,8 +27,8 @@ class DBHandler(logging.StreamHandler):
                 f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
 
     def select(self):
-        results = self.cursor.execute(get_latest_dataset_link_sql)
-        results.fetchall()
+        results = self.cursor.get_records(get_latest_dataset_link_sql)
+        print(results)
 
     def close(self):
         self.conn.commit()
