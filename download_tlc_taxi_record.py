@@ -50,13 +50,26 @@ def get_latest_dataset_id():
 def make_dynamic_url(num, **context):
     db = DBHandler()
     id = context['ti'].xcom_pull(task_ids='get_latest_dataset_id')
-    urls = db.select(f"""
-        SELECT
-            dataset_link
-        FROM dataset_meta
-        WHERE id BETWEEN {id + 1} AND {id + (num - 1)};
-        """
-                     )
+    urls = []
+
+    if id == 1:
+        urls.append(db.select(f"""
+            SELECT
+                dataset_link
+            FROM dataset_meta
+            WHERE id BETWEEN {id} AND {num};
+            """
+                              )
+                    )
+    else:
+        urls.append(db.select(f"""
+            SELECT
+                dataset_link
+            FROM dataset_meta
+            WHERE id BETWEEN {id + 1} AND {id + (num - 1)};
+            """
+                              )
+                    )
 
     db.close()
     print(urls)
