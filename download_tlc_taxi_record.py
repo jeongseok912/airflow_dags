@@ -75,13 +75,8 @@ def make_dynamic_url(num, **context):
     return urls
 
 
-def download_and_upload(url):
+def download_and_upload(url, logger):
     print("----------------------------")
-    logger = logging.getLogger("dataset")
-    logger.setLevel(logging.INFO)
-
-    dbhandler = DBHandler()
-    logger.addHandler(dbhandler)
 
     # get next index's dataset link of lasted index
     file_name = url.split("/")[-1]
@@ -89,7 +84,7 @@ def download_and_upload(url):
     print("********************************************")
 
     # download dataset
-    logger.info("다운로드 시작: {url}")
+    logger.info(f"다운로드 시작: {url}")
     '''
     response = requests.get(url)
     if response.status_code != 200:
@@ -114,12 +109,18 @@ def download_and_upload(url):
 
     logger.info(url)
 
-    dbhandler.close()
-
 
 async def gather(urls):
+    logger = logging.getLogger("dataset")
+    logger.setLevel(logging.INFO)
+
+    dbhandler = DBHandler()
+    logger.addHandler(dbhandler)
+
     async with aiohttp.ClientSession() as session:
-        await asyncio.gather(*[download_and_upload(url) for url in urls])
+        await asyncio.gather(*[download_and_upload(url, logger) for url in urls])
+
+    dbhandler.close()
 
 
 def async_download_upload(**context):
