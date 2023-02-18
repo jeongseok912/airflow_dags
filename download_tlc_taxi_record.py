@@ -13,7 +13,7 @@ get_latest_dataset_link_sql = """
         SELECT 
             MAX(dataset_id) 
         FROM dataset_log 
-        WHERE logical_date = SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY);
+        WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY));
     """
 
 
