@@ -9,19 +9,6 @@ from airflow.providers.mysql.operators.mysql import MySqlOperator, MySqlHook
 from airflow.models import Variable
 
 
-sql_get_latest_dataset_link = """
-    SELECT 
-        dataset_link 
-    FROM dataset_meta 
-    WHERE id = (
-        SELECT 
-            MAX(dataset_id) 
-        FROM dataset_log 
-        WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY))
-    );
-    """
-
-
 class DBHandler(logging.StreamHandler):
     def __init__(self):
         super().__init__()
@@ -34,13 +21,28 @@ class DBHandler(logging.StreamHandler):
             self.cursor.execute(
                 f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
 
-    def select(self):
-        return self.hook.get_first(sql_get_latest_dataset_link)
+    def select(self, sql):
+        return self.hook.get_first(sql)
 
     def close(self):
         self.conn.commit()
         self.cursor.close()
         self.conn.close()
+
+
+sql_get_latest_dataset_link = """
+    SELECT 
+        dataset_link 
+    FROM dataset_meta 
+    WHERE id = (
+        SELECT 
+            MAX(dataset_id) 
+        FROM dataset_log 
+        WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY))
+    );
+    """
+
+sql_get_first_dataset_link = "SELECT dataset_link FROM dataset_meta WHERE id = 1;"
 
 
 def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, utc_hour, utc_minute, **context):
@@ -52,10 +54,12 @@ def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, ut
     logger.addHandler(dbhandler)
 
     # get next index's dataset link of lasted index
-    url = "https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2019-02.parquet"
+    url = dbhandler.select(sql_get_latest_dataset_link)
+    if url is not None:
+        url = dbhandler.select(sql_get_first_dataset_link)
     file_name = url.split("/")[-1]
 
-    print(dbhandler.select())
+    print(url)
     print("********************************************")
 
     # download dataset
