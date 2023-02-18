@@ -49,6 +49,8 @@ def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, ut
     url = "https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2019-02.parquet"
     file_name = url.split("/")[-1]
 
+    print(dbhandler.select())
+
     # download dataset
     logger.info("다운로드 시작: {url}")
     '''
