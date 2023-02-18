@@ -22,7 +22,7 @@ class DBHandler(logging.StreamHandler):
                 f"INSERT INTO log VALUES ('{record.msg}', SYSDATE());")
 
     def select(self, sql):
-        return self.hook.get_first(sql)
+        return self.hook.get_records(sql)
 
     def close(self):
         self.conn.commit()
