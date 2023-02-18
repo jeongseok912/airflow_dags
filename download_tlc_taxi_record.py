@@ -33,9 +33,9 @@ class DBHandler(logging.StreamHandler):
 def get_latest_dataset_id():
     db = DBHandler()
     id = db.select("""
-        SELECT 
-            MAX(dataset_id) 
-        FROM dataset_log 
+        SELECT
+            MAX(dataset_id)
+        FROM dataset_log
         WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY));
         """
                    )[0]
@@ -47,23 +47,16 @@ def get_latest_dataset_id():
     return id
 
 
-def make_dynamic_url(**context, num):
+def make_dynamic_url(num, **context):
     db = DBHandler()
     id = context['ti'].xcom_pull(task_ids='get_latest_dataset_id')
-    urls = []
-
-    if id == 1:
-        urls.append(
-            db.select(f"SELECT dataset_link FROM dataset_meta WHERE id = {id};"))
-
-    urls.append(db.select(f"""
+    urls = db.select(f"""
         SELECT
             dataset_link
         FROM dataset_meta
         WHERE id BETWEEN {id + 1} AND {id + (num - 1)};
         """
-                          )
-                )
+                     )
 
     db.close()
     print(urls)
@@ -117,6 +110,8 @@ with DAG(
     'download_tlc_taxi_record',
     start_date=datetime(2022, 2, 6),
     schedule_interval=None,
+
+
 ) as dag:
 
     get_latest_dataset_id = PythonOperator(
