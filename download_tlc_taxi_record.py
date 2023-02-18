@@ -47,7 +47,7 @@ def get_latest_dataset_id():
     return id
 
 
-def make_dynamic_url(**context, **kwargs):
+def make_dynamic_url(**context, num):
     db = DBHandler()
     id = context['ti'].xcom_pull(task_ids='get_latest_dataset_id')
     urls = []
@@ -60,7 +60,7 @@ def make_dynamic_url(**context, **kwargs):
         SELECT
             dataset_link
         FROM dataset_meta
-        WHERE id BETWEEN {id + 1} AND {id + (kwargs["num"] - 1)};
+        WHERE id BETWEEN {id + 1} AND {id + (num - 1)};
         """
                           )
                 )
