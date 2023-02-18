@@ -5,8 +5,7 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.mysql.operators.mysql import MySqlOperator
-from airflow.providers.mysql.hooks.mysql import MySqlHook
+from airflow.providers.mysql.operators.mysql import MySqlOperator, MySqlHook
 from airflow.models import Variable
 
 
@@ -29,8 +28,7 @@ class DBHandler(logging.StreamHandler):
 
     def select(self):
         results = self.cursor.execute(get_latest_dataset_link_sql)
-        for result in results:
-            print(result)
+        results.fetchall()
 
     def close(self):
         self.conn.commit()
