@@ -56,9 +56,7 @@ def download_dataset_and_upload_to_s3(year, month, day, hour, minute, utc_dt, ut
     # get next index's dataset link of lasted index
     url = dbhandler.select(sql_get_latest_dataset_link)
     if url is None:
-        url = dbhandler.select(sql_get_first_dataset_link)
-        print(11111111111111111111)
-        print(url[0])
+        url = dbhandler.select(sql_get_first_dataset_link)[0]
     file_name = url.split("/")[-1]
 
     print(url)
