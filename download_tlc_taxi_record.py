@@ -75,7 +75,7 @@ def make_dynamic_url(num, **context):
     return urls
 
 
-def download_and_upload(url, logger):
+async def download_and_upload(url, logger):
     print("----------------------------")
     file_name = url.split("/")[-1]
 
