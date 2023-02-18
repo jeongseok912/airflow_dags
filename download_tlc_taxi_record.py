@@ -38,8 +38,8 @@ def get_latest_dataset_id():
         FROM dataset_log
         WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY));
         """
-                   )
-    print(f"id: {id}")
+                   )[0][0]
+
     if id is None:
         id = 1
 
