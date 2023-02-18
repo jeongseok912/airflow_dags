@@ -34,8 +34,7 @@ sql_get_latest_dataset_id = """
     SELECT 
         MAX(dataset_id) 
     FROM dataset_log 
-    WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY))
-    );
+    WHERE logical_date = (SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY));
     """
 
 sql_get_first_dataset_link = "SELECT dataset_link FROM dataset_meta WHERE id = 1;"
