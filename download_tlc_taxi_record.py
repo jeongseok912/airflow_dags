@@ -110,6 +110,15 @@ get_latest_dataset_link_sql = """
     """
 '''
 
+
+def get_latest_dataset_link(**context):
+    ti = context['ti']
+    result = ti.xcom_pull(task_ids='get_latest_dataset_id')
+    if result:
+        for row in result:
+            print(row)
+
+
 with DAG(
     'download_tlc_taxi_record',
     start_date=datetime(2022, 2, 6),
@@ -120,6 +129,12 @@ with DAG(
         task_id='get_latest_dataset_id',
         mysql_conn_id='TLC_TAXI',
         sql=get_latest_dataset_link_sql
+    )
+
+    get_latest_dataset_link = PythonOperator(
+        task_id='get_latest_dataset_link',
+        provide_context=True,
+        python_callable=get_latest_dataset_link
     )
 
     download_dataset_and_upload_to_s3 = PythonOperator(
@@ -138,4 +153,4 @@ with DAG(
         provide_context=True
     )
 
-get_latest_dataset_id >> download_dataset_and_upload_to_s3
+get_latest_dataset_id >> get_latest_dataset_link >> download_dataset_and_upload_to_s3
