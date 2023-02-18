@@ -40,9 +40,9 @@ sql_get_latest_dataset_id = """
 sql_get_first_dataset_link = "SELECT dataset_link FROM dataset_meta WHERE id = 1;"
 
 
-def get_latest_dataset_id(**context):
+def get_latest_dataset_id():
     db = DBHandler()
-    id = db.select(sql_get_latest_dataset_id)
+    id = db.select(sql_get_latest_dataset_id)[0]
     if id is None:
         id = 1
 
