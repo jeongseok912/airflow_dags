@@ -105,18 +105,20 @@ async def download_and_upload(url, logger):
 
     logger.info(f"S3 업로드 시작 - {url}")
     upload_start = time.time()
-    s3.put_object(Bucket=bucket, Key=key, Body=response.content
+
+    s3.put_object(Bucket=bucket, Key=key, Body=response.content)
+
     logger.info(f"S3 업로드 완료 - {url}")
-    upload_end=time.time()
-    upload_elapsed=upload_end - upload_start
+    upload_end = time.time()
+    upload_elapsed = upload_end - upload_start
     print(f"업로드 시간: {upload_elapsed}초, {url}")
 
 
 async def gather(urls):
-    logger=logging.getLogger("dataset")
+    logger = logging.getLogger("dataset")
     logger.setLevel(logging.INFO)
 
-    dbhandler=DBHandler()
+    dbhandler = DBHandler()
     logger.addHandler(dbhandler)
 
     async with aiohttp.ClientSession() as session:
@@ -126,9 +128,9 @@ async def gather(urls):
 
 
 def async_download_upload(**context):
-    urls=context['ti'].xcom_pull(task_ids='make_dynamic_url')
+    urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
 
-    loop=asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()
     loop.run_until_complete(gather(urls))
     loop.close()
 
@@ -141,19 +143,19 @@ with DAG(
 
 ) as dag:
 
-    get_latest_dataset_id=PythonOperator(
+    get_latest_dataset_id = PythonOperator(
         task_id="get_latest_dataset_id",
         python_callable=get_latest_dataset_id
     )
 
-    make_dynamic_url=PythonOperator(
+    make_dynamic_url = PythonOperator(
         task_id="make_dynamic_url",
         python_callable=make_dynamic_url,
         op_kwargs={
             "num": 2
         }
     )
-    async_download_upload=PythonOperator(
+    async_download_upload = PythonOperator(
         task_id="async_download_upload",
         python_callable=async_download_upload,
         provide_context=True
