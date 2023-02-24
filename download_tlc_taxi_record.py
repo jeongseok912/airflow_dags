@@ -86,12 +86,14 @@ async def fetch_and_upload(url, logger):
     logger.info(f"다운로드 시작 - {url}")
     download_start = time.time()
 
-    response = await loop.run_in_executor(None, requests.get, url)
-    data = await loop.run_in_executor(None, response.content)
-
+    # response = await loop.run_in_executor(None, requests.get, url)
+    # data = await loop.run_in_executor(None, response.content)
+    response = requests.get(url)
     if response.status_code != 200:
         logger.error(f"다운로드 실패 - {url}")
         raise Exception(f"다운로드 실패 - {url}")
+
+    data = response.content
 
     logger.info(f"다운로드 완료 - {url}")
     download_end = time.time()
@@ -131,7 +133,7 @@ async def gather(urls):
     dbhandler = DBHandler()
     logger.addHandler(dbhandler)
 
-    await asyncio.gather(*[asyncio.ensure_future(fetch_and_upload(url, logger)) for url in urls])
+    await asyncio.gather(*[fetch_and_upload(url, logger) for url in urls])
 
     dbhandler.close()
 
