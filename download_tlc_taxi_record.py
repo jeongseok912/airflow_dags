@@ -76,7 +76,7 @@ def make_dynamic_url(num, **context):
     return urls
 
 
-async def download_and_upload(url, logger):
+async def fetch_and_upload(session, url, logger):
     print(f"다운로드 & 업로드 시작 - {url}")
     downup_start = time.time()
 
@@ -86,10 +86,11 @@ async def download_and_upload(url, logger):
     logger.info(f"다운로드 시작 - {url}")
     download_start = time.time()
 
-    response = requests.get(url)
-    if response.status_code != 200:
-        logger.error(f"다운로드 실패 - {url}")
-        raise Exception(f"다운로드 실패 - {url}")
+    async with session.get(url) as response:
+        if response.status != 200:
+            logger.error(f"다운로드 실패 - {url}")
+            raise Exception(f"다운로드 실패 - {url}")
+    data = response.content
 
     logger.info(f"다운로드 완료 - {url}")
     download_end = time.time()
@@ -109,7 +110,7 @@ async def download_and_upload(url, logger):
     logger.info(f"S3 업로드 시작 - {url}")
     upload_start = time.time()
 
-    s3.put_object(Bucket=bucket, Key=key, Body=response.content)
+    s3.put_object(Bucket=bucket, Key=key, Body=data)
 
     logger.info(f"S3 업로드 완료 - {url}")
     upload_end = time.time()
@@ -130,37 +131,41 @@ async def gather(urls):
     logger.addHandler(dbhandler)
 
     async with aiohttp.ClientSession() as session:
-        await asyncio.gather(*[asyncio.ensure_future(download_and_upload(url, logger)) for url in urls])
+        await asyncio.gather(*[asyncio.fetch_and_upload(session, url, logger)) for url in urls])
 
     dbhandler.close()
 
 
 def async_download_upload(**context):
-    urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
-    print("---- 이벤트 시작 ----")
-    start = time.time()
+    urls=context['ti'].xcom_pull(task_ids = 'make_dynamic_url')
+    print("********************")
+    print("**** 이벤트 시작 ****")
+    print("********************")
+    start=time.time()
 
-    loop = asyncio.get_event_loop()
+    loop=asyncio.get_event_loop()
     loop.run_until_complete(gather(urls))
     loop.close()
 
-    print("---- 이벤트 종료 ----")
-    end = time.time()
-    elapsed = int(end - start)
-    print(f"---- 이벤트 경과 시간: {elapsed}초")
+    print("********************")
+    print("**** 이벤트 종료 ****")
+    print("********************")
+    end=time.time()
+    elapsed=int(end - start)
+    print(f"이벤트 경과 시간: {elapsed}초")
 
 
 with DAG(
     'download_tlc_taxi_record',
-    start_date=datetime(2022, 2, 6),
-    schedule_interval=None,
+    start_date = datetime(2022, 2, 6),
+    schedule_interval = None,
 
 
 ) as dag:
 
-    get_latest_dataset_id = PythonOperator(
-        task_id="get_latest_dataset_id",
-        python_callable=get_latest_dataset_id
+    get_latest_dataset_id=PythonOperator(
+        task_id = "get_latest_dataset_id",
+        python_callable = get_latest_dataset_id
     )
 
     make_dynamic_url = PythonOperator(
