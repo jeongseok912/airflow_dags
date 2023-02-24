@@ -131,41 +131,41 @@ async def gather(urls):
     logger.addHandler(dbhandler)
 
     async with aiohttp.ClientSession() as session:
-        await asyncio.gather(*[asyncio.fetch_and_upload(session, url, logger)) for url in urls])
+        await asyncio.gather(*[asyncio.fetch_and_upload(session, url, logger) for url in urls])
 
     dbhandler.close()
 
 
 def async_download_upload(**context):
-    urls=context['ti'].xcom_pull(task_ids = 'make_dynamic_url')
+    urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
     print("********************")
     print("**** 이벤트 시작 ****")
     print("********************")
-    start=time.time()
+    start = time.time()
 
-    loop=asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()
     loop.run_until_complete(gather(urls))
     loop.close()
 
     print("********************")
     print("**** 이벤트 종료 ****")
     print("********************")
-    end=time.time()
-    elapsed=int(end - start)
+    end = time.time()
+    elapsed = int(end - start)
     print(f"이벤트 경과 시간: {elapsed}초")
 
 
 with DAG(
     'download_tlc_taxi_record',
-    start_date = datetime(2022, 2, 6),
-    schedule_interval = None,
+    start_date=datetime(2022, 2, 6),
+    schedule_interval=None,
 
 
 ) as dag:
 
-    get_latest_dataset_id=PythonOperator(
-        task_id = "get_latest_dataset_id",
-        python_callable = get_latest_dataset_id
+    get_latest_dataset_id = PythonOperator(
+        task_id="get_latest_dataset_id",
+        python_callable=get_latest_dataset_id
     )
 
     make_dynamic_url = PythonOperator(
