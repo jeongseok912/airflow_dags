@@ -77,6 +77,9 @@ def make_dynamic_url(num, **context):
 
 
 async def download_and_upload(url, logger):
+    print(f"다운로드 & 업로드 시작 - {url}")
+    downup_start = time.time()
+
     file_name = url.split("/")[-1]
 
     # download dataset
@@ -90,7 +93,7 @@ async def download_and_upload(url, logger):
 
     logger.info(f"다운로드 완료 - {url}")
     download_end = time.time()
-    download_elpased = download_end - download_start
+    download_elpased = int(download_end - download_start)
     print(f"다운로드 시간: {download_elpased}초, {url}")
 
     # upload to s3
@@ -110,8 +113,13 @@ async def download_and_upload(url, logger):
 
     logger.info(f"S3 업로드 완료 - {url}")
     upload_end = time.time()
-    upload_elapsed = upload_end - upload_start
+    upload_elapsed = int(upload_end - upload_start)
     print(f"업로드 시간: {upload_elapsed}초, {url}")
+
+    downup_end = time.time()
+    downup_elapsed = int(downup_end - downup_start)
+    print(f"다운로드 & 업로드 완료 - {url}")
+    print(f"다운로드 & 업로드 경과시간: {downup_elapsed}초")
 
 
 async def gather(urls):
@@ -129,10 +137,17 @@ async def gather(urls):
 
 def async_download_upload(**context):
     urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
+    print("---- 이벤트 시작 ----")
+    start = time.time()
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(gather(urls))
     loop.close()
+
+    print("---- 이벤트 종료 ----")
+    end = time.time()
+    elapsed = int(end - start)
+    print(f"---- 이벤트 경과 시간: {elapsed}초")
 
 
 with DAG(
