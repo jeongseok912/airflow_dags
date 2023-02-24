@@ -139,7 +139,8 @@ async def gather(urls):
     dbhandler = DBHandler()
     logger.addHandler(dbhandler)
 
-    async with aiohttp.ClientSession() as session:
+    timeout = aiohttp.ClientTimeout(total=10)  # default 300s(5min)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
         await asyncio.gather(*[fetch_and_upload(session, url, logger) for url in urls])
 
     dbhandler.close()
