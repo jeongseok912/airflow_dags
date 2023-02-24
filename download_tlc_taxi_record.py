@@ -87,50 +87,49 @@ async def fetch_and_upload(session, url, logger):
     download_start = time.time()
 
     async with session.get(url) as response:
-        if response.status == 200:
-            print(response)
-            data = response.content
-            print(data)
-    # response = await loop.run_in_executor(None, requests.get, url)
-    # data = await loop.run_in_executor(None, response.content)
-    '''
-    response = requests.get(url)
-    if response.status_code != 200:
-        logger.error(f"다운로드 실패 - {url}")
-        raise Exception(f"다운로드 실패 - {url}")
+        if response.status != 200:
+            logger.error(f"다운로드 실패 - {url}")
+            raise Exception(f"다운로드 실패 - {url}")
+        data = response.content
+        # response = await loop.run_in_executor(None, requests.get, url)
+        # data = await loop.run_in_executor(None, response.content)
+        '''
+        response = requests.get(url)
+        if response.status_code != 200:
+            logger.error(f"다운로드 실패 - {url}")
+            raise Exception(f"다운로드 실패 - {url}")
 
-    data = response.content
-    '''
+        data = response.content
+        '''
+        logger.info(f"다운로드 완료 - {url}")
+        download_end = time.time()
+        download_elpased = int(download_end - download_start)
+        print(f"다운로드 시간: {download_elpased}초, {url}")
 
-    logger.info(f"다운로드 완료 - {url}")
-    download_end = time.time()
-    download_elpased = int(download_end - download_start)
-    print(f"다운로드 시간: {download_elpased}초, {url}")
+        # upload to s3
+        aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
+        aws_secret_access_key = Variable.get("AWS_SECRET_ACCESS_KEY")
 
-    # upload to s3
-    aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
-    aws_secret_access_key = Variable.get("AWS_SECRET_ACCESS_KEY")
+        s3 = boto3.client("s3", aws_access_key_id=aws_access_key_id,
+                          aws_secret_access_key=aws_secret_access_key)
+        bucket = Variable.get("AWS_S3_BUCKET_TLC_TAXI")
+        dir = file_name.split("-")[0].split("_")[-1]
+        key = f"{dir}/{file_name}"
 
-    s3 = boto3.client("s3", aws_access_key_id=aws_access_key_id,
-                      aws_secret_access_key=aws_secret_access_key)
-    bucket = Variable.get("AWS_S3_BUCKET_TLC_TAXI")
-    dir = file_name.split("-")[0].split("_")[-1]
-    key = f"{dir}/{file_name}"
+        logger.info(f"S3 업로드 시작 - {url}")
+        upload_start = time.time()
 
-    logger.info(f"S3 업로드 시작 - {url}")
-    upload_start = time.time()
+        s3.put_object(Bucket=bucket, Key=key, Body=data)
 
-    s3.put_object(Bucket=bucket, Key=key, Body=data)
+        logger.info(f"S3 업로드 완료 - {url}")
+        upload_end = time.time()
+        upload_elapsed = int(upload_end - upload_start)
+        print(f"업로드 시간: {upload_elapsed}초, {url}")
 
-    logger.info(f"S3 업로드 완료 - {url}")
-    upload_end = time.time()
-    upload_elapsed = int(upload_end - upload_start)
-    print(f"업로드 시간: {upload_elapsed}초, {url}")
-
-    downup_end = time.time()
-    downup_elapsed = int(downup_end - downup_start)
-    print(f"다운로드 & 업로드 완료 - {url}")
-    print(f"다운로드 & 업로드 경과시간: {downup_elapsed}초")
+        downup_end = time.time()
+        downup_elapsed = int(downup_end - downup_start)
+        print(f"다운로드 & 업로드 완료 - {url}")
+        print(f"다운로드 & 업로드 경과시간: {downup_elapsed}초")
 
 
 async def gather(urls):
