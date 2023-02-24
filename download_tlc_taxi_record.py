@@ -88,7 +88,9 @@ async def fetch_and_upload(session, url, logger):
 
     async with session.get(url) as response:
         if response.status == 200:
-            data = await response.content
+            print(response)
+            data = response.content
+            print(data)
     # response = await loop.run_in_executor(None, requests.get, url)
     # data = await loop.run_in_executor(None, response.content)
     '''
