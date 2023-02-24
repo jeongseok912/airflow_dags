@@ -90,7 +90,7 @@ async def fetch_and_upload(session, url, logger):
         if response.status != 200:
             logger.error(f"다운로드 실패 - {url}")
             raise Exception(f"다운로드 실패 - {url}")
-        data = response.content
+        data = await response.read()
         # response = await loop.run_in_executor(None, requests.get, url)
         # data = await loop.run_in_executor(None, response.content)
         '''
