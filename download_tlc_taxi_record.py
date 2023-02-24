@@ -140,18 +140,21 @@ async def gather(urls):
 
 def async_download_upload(**context):
     urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
-    print("*********************")
-    print("**** 이벤트 시작 ****")
-    print("*********************")
+    print("***********************")
+    print("***** 이벤트 시작 *****")
+    print("***********************")
     start = time.time()
 
+    '''
     loop = asyncio.get_event_loop()
     loop.run_until_complete(gather(urls))
     loop.close()
+    '''
+    asyncio.run(gather(urls))
 
-    print("*********************")
-    print("**** 이벤트 종료 ****")
-    print("*********************")
+    print("***********************")
+    print("***** 이벤트 종료 *****")
+    print("***********************")
     end = time.time()
     elapsed = int(end - start)
     print(f"이벤트 경과 시간: {elapsed}초")
