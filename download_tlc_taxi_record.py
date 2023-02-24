@@ -76,13 +76,7 @@ def make_dynamic_url(num, **context):
     return urls
 
 
-async def fetch_and_upload(url):
-    logger = logging.getLogger("dataset")
-    logger.setLevel(logging.INFO)
-
-    dbhandler = DBHandler()
-    logger.addHandler(dbhandler)
-
+async def fetch_and_upload(session, url, logger):
     print(f"다운로드 & 업로드 시작 - {url}")
     downup_start = time.time()
 
@@ -92,14 +86,19 @@ async def fetch_and_upload(url):
     logger.info(f"다운로드 시작 - {url}")
     download_start = time.time()
 
+    async with session.get(url) as response:
+        if response.status == 200:
+            data = await response.content
     # response = await loop.run_in_executor(None, requests.get, url)
     # data = await loop.run_in_executor(None, response.content)
+    '''
     response = requests.get(url)
     if response.status_code != 200:
         logger.error(f"다운로드 실패 - {url}")
         raise Exception(f"다운로드 실패 - {url}")
 
     data = response.content
+    '''
 
     logger.info(f"다운로드 완료 - {url}")
     download_end = time.time()
@@ -131,13 +130,18 @@ async def fetch_and_upload(url):
     print(f"다운로드 & 업로드 완료 - {url}")
     print(f"다운로드 & 업로드 경과시간: {downup_elapsed}초")
 
-    dbhandler.close()
-
 
 async def gather(urls):
-    for url in urls:
-        asyncio.create_task(fetch_and_upload(url))
-    # await asyncio.gather(*[fetch_and_upload(url, logger) for url in urls])
+    logger = logging.getLogger("dataset")
+    logger.setLevel(logging.INFO)
+
+    dbhandler = DBHandler()
+    logger.addHandler(dbhandler)
+
+    async with aiohttp.ClientSession() as session:
+        await asyncio.gather(*[fetch_and_upload(session, url, logger) for url in urls])
+
+    dbhandler.close()
 
 
 def async_download_upload(**context):
