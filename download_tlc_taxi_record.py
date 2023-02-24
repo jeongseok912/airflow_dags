@@ -76,7 +76,13 @@ def make_dynamic_url(num, **context):
     return urls
 
 
-async def fetch_and_upload(url, logger):
+async def fetch_and_upload(url):
+    logger = logging.getLogger("dataset")
+    logger.setLevel(logging.INFO)
+
+    dbhandler = DBHandler()
+    logger.addHandler(dbhandler)
+
     print(f"다운로드 & 업로드 시작 - {url}")
     downup_start = time.time()
 
@@ -125,19 +131,13 @@ async def fetch_and_upload(url, logger):
     print(f"다운로드 & 업로드 완료 - {url}")
     print(f"다운로드 & 업로드 경과시간: {downup_elapsed}초")
 
+    dbhandler.close()
+
 
 async def gather(urls):
-    logger = logging.getLogger("dataset")
-    logger.setLevel(logging.INFO)
-
-    dbhandler = DBHandler()
-    logger.addHandler(dbhandler)
-
     for url in urls:
-        asyncio.create_task(fetch_and_upload(url, logger))
+        asyncio.create_task(fetch_and_upload(url))
     # await asyncio.gather(*[fetch_and_upload(url, logger) for url in urls])
-
-    dbhandler.close()
 
 
 def async_download_upload(**context):
