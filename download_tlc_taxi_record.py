@@ -4,6 +4,7 @@ import boto3
 import logging
 import aiohttp
 import asyncio
+import time
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -76,18 +77,21 @@ def make_dynamic_url(num, **context):
 
 
 async def download_and_upload(url, logger):
-    print("----------------------------")
     file_name = url.split("/")[-1]
 
     # download dataset
     logger.info(f"다운로드 시작 - {url}")
-    '''
+    download_start = time.time()
+
     response = requests.get(url)
     if response.status_code != 200:
-        logger.error("다운로드 실패")
-        raise Exception(f"다운로드 실패: {url}")
-    '''
+        logger.error(f"다운로드 실패 - {url}")
+        raise Exception(f"다운로드 실패 - {url}")
+
     logger.info(f"다운로드 완료 - {url}")
+    download_end = time.time()
+    download_elpased = download_end - download_start
+    print(f"다운로드 시간: {download_elpased}초, {url}")
 
     # upload to s3
     aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
@@ -95,20 +99,24 @@ async def download_and_upload(url, logger):
 
     s3 = boto3.client("s3", aws_access_key_id=aws_access_key_id,
                       aws_secret_access_key=aws_secret_access_key)
-    bucket = "tlc-taxi"
+    bucket = Variable.get("AWS_S3_BUCKET_TLC_TAXI")
     dir = file_name.split("-")[0].split("_")[-1]
     key = f"{dir}/{file_name}"
 
     logger.info(f"S3 업로드 시작 - {url}")
-    # s3.put_object(Bucket=bucket, Key=key, Body=response.content)
+    upload_start = time.time()
+    s3.put_object(Bucket=bucket, Key=key, Body=response.content
     logger.info(f"S3 업로드 완료 - {url}")
+    upload_end=time.time()
+    upload_elapsed=upload_end - upload_start
+    print(f"업로드 시간: {upload_elapsed}초, {url}")
 
 
 async def gather(urls):
-    logger = logging.getLogger("dataset")
+    logger=logging.getLogger("dataset")
     logger.setLevel(logging.INFO)
 
-    dbhandler = DBHandler()
+    dbhandler=DBHandler()
     logger.addHandler(dbhandler)
 
     async with aiohttp.ClientSession() as session:
@@ -118,9 +126,9 @@ async def gather(urls):
 
 
 def async_download_upload(**context):
-    urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
+    urls=context['ti'].xcom_pull(task_ids='make_dynamic_url')
 
-    loop = asyncio.get_event_loop()
+    loop=asyncio.get_event_loop()
     loop.run_until_complete(gather(urls))
     loop.close()
 
@@ -133,19 +141,19 @@ with DAG(
 
 ) as dag:
 
-    get_latest_dataset_id = PythonOperator(
+    get_latest_dataset_id=PythonOperator(
         task_id="get_latest_dataset_id",
         python_callable=get_latest_dataset_id
     )
 
-    make_dynamic_url = PythonOperator(
+    make_dynamic_url=PythonOperator(
         task_id="make_dynamic_url",
         python_callable=make_dynamic_url,
         op_kwargs={
             "num": 2
         }
     )
-    async_download_upload = PythonOperator(
+    async_download_upload=PythonOperator(
         task_id="async_download_upload",
         python_callable=async_download_upload,
         provide_context=True
