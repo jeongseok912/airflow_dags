@@ -133,7 +133,9 @@ async def gather(urls):
     dbhandler = DBHandler()
     logger.addHandler(dbhandler)
 
-    await asyncio.gather(*[fetch_and_upload(url, logger) for url in urls])
+    for url in urls:
+        asyncio.create_task(fetch_and_upload(url, logger))
+    # await asyncio.gather(*[fetch_and_upload(url, logger) for url in urls])
 
     dbhandler.close()
 
