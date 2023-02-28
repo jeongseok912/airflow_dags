@@ -8,7 +8,8 @@ import time
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.mysql.operators.mysql import MySqlOperator, MySqlHook
+from airflow.providers.mysql.operators.mysql import MySqlOperator
+from airflow.providers.mysql.hooks.mysql import MySqlHook
 from airflow.models import Variable
 
 
@@ -77,34 +78,34 @@ def make_dynamic_url(num, **context):
 
 
 async def fetch_and_upload(session, url, logger):
-    print(f"다운로드 & 업로드 시작 - {url}")
+    print(f"download & upload start - {url}")
     downup_start = time.time()
 
     file_name = url.split("/")[-1]
 
     # download dataset
-    logger.info(f"다운로드 시작 - {url}")
+    logger.info("download start - {url}")
     download_start = time.time()
 
     async with session.get(url) as response:
         if response.status != 200:
-            logger.error(f"다운로드 실패 - {url}")
-            raise Exception(f"다운로드 실패 - {url}")
+            logger.error(f"download fail - {url}")
+            raise Exception(f"download fail - {url}")
         data = await response.read()
         # response = await loop.run_in_executor(None, requests.get, url)
         # data = await loop.run_in_executor(None, response.content)
         '''
         response = requests.get(url)
         if response.status_code != 200:
-            logger.error(f"다운로드 실패 - {url}")
-            raise Exception(f"다운로드 실패 - {url}")
+            logger.error(f"download fail - {url}")
+            raise Exception(f"download fail - {url}")
 
         data = response.content
         '''
-        logger.info(f"다운로드 완료 - {url}")
+        logger.info(f"download complete - {url}")
         download_end = time.time()
         download_elpased = int(download_end - download_start)
-        print(f"다운로드 시간: {download_elpased}초, {url}")
+        print(f"download time: {download_elpased} sec, {url}")
 
         # upload to s3
         aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
@@ -116,20 +117,20 @@ async def fetch_and_upload(session, url, logger):
         dir = file_name.split("-")[0].split("_")[-1]
         key = f"{dir}/{file_name}"
 
-        logger.info(f"S3 업로드 시작 - {url}")
+        logger.info(f"s3 upload start - {url}")
         upload_start = time.time()
 
         s3.put_object(Bucket=bucket, Key=key, Body=data)
 
-        logger.info(f"S3 업로드 완료 - {url}")
+        logger.info(f"s3 upload complete - {url}")
         upload_end = time.time()
         upload_elapsed = int(upload_end - upload_start)
-        print(f"업로드 시간: {upload_elapsed}초, {url}")
+        print(f"upload time: {upload_elapsed} sec, {url}")
 
         downup_end = time.time()
         downup_elapsed = int(downup_end - downup_start)
-        print(f"다운로드 & 업로드 완료 - {url}")
-        print(f"다운로드 & 업로드 경과시간: {downup_elapsed}초")
+        print(f"download & upload complete - {url}")
+        print(f"download & upload time: {downup_elapsed} sec")
 
 
 async def gather(urls):
@@ -149,7 +150,7 @@ async def gather(urls):
 def async_download_upload(**context):
     urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
     print("***********************")
-    print("***** 이벤트 시작 *****")
+    print("***** event start *****")
     print("***********************")
     start = time.time()
 
@@ -161,11 +162,11 @@ def async_download_upload(**context):
     asyncio.run(gather(urls))
 
     print("***********************")
-    print("***** 이벤트 종료 *****")
+    print("***** event finish *****")
     print("***********************")
     end = time.time()
     elapsed = int(end - start)
-    print(f"이벤트 경과 시간: {elapsed}초")
+    print(f"event time: {elapsed} sec")
 
 
 with DAG(
