@@ -78,19 +78,18 @@ def make_dynamic_url(num, **context):
 
 
 async def fetch_and_upload(session, url, logger):
-    print(f"download & upload start - {url}")
     downup_start = time.time()
 
     file_name = url.split("/")[-1]
 
     # download dataset
-    logger.info("download start - {url}")
+    logger.info(f"{url} - download started.")
     download_start = time.time()
 
     async with session.get(url) as response:
         if response.status != 200:
-            logger.error(f"download fail - {url}")
-            raise Exception(f"download fail - {url}")
+            logger.error(f"{url} - download failed.")
+            raise Exception(f"{url} - download failed.")
         data = await response.read()
         # response = await loop.run_in_executor(None, requests.get, url)
         # data = await loop.run_in_executor(None, response.content)
@@ -102,10 +101,10 @@ async def fetch_and_upload(session, url, logger):
 
         data = response.content
         '''
-        logger.info(f"download complete - {url}")
+        logger.info(f"{url} - download completed.")
         download_end = time.time()
         download_elpased = int(download_end - download_start)
-        print(f"download time: {download_elpased} sec, {url}")
+        print(f"{url} - download elapsed: {download_elpased}s.")
 
         # upload to s3
         aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
@@ -117,20 +116,19 @@ async def fetch_and_upload(session, url, logger):
         dir = file_name.split("-")[0].split("_")[-1]
         key = f"{dir}/{file_name}"
 
-        logger.info(f"s3 upload start - {url}")
+        logger.info(f"{url} - s3 upload started.")
         upload_start = time.time()
 
         s3.put_object(Bucket=bucket, Key=key, Body=data)
 
-        logger.info(f"s3 upload complete - {url}")
+        logger.info(f"{url} - s3 upload completed.")
         upload_end = time.time()
         upload_elapsed = int(upload_end - upload_start)
-        print(f"upload time: {upload_elapsed} sec, {url}")
+        print(f"{url} - upload elapsed: {upload_elapsed}s.")
 
         downup_end = time.time()
         downup_elapsed = int(downup_end - downup_start)
-        print(f"download & upload complete - {url}")
-        print(f"download & upload time: {downup_elapsed} sec")
+        print(f"{url} - total download & upload elapsed: {downup_elapsed}s.")
 
 
 async def gather(urls):
@@ -150,7 +148,7 @@ async def gather(urls):
 def async_download_upload(**context):
     urls = context['ti'].xcom_pull(task_ids='make_dynamic_url')
     print("***********************")
-    print("***** event start *****")
+    print("***** Event started. *****")
     print("***********************")
     start = time.time()
 
@@ -162,7 +160,7 @@ def async_download_upload(**context):
     asyncio.run(gather(urls))
 
     print("***********************")
-    print("***** event finish *****")
+    print("***** Event finished. *****")
     print("***********************")
     end = time.time()
     elapsed = int(end - start)
