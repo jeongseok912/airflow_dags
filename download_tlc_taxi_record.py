@@ -53,6 +53,7 @@ def get_latest_dataset_id():
     return id
 
 
+@task
 def make_dynamic_url(num, **context):
     db = DBHandler()
     id = context['ti'].xcom_pull(task_ids='get_latest_dataset_id')
@@ -181,6 +182,7 @@ with DAG(
         python_callable=get_latest_dataset_id
     )
 
+    '''
     make_dynamic_url = PythonOperator(
         task_id="make_dynamic_url",
         python_callable=make_dynamic_url,
@@ -188,6 +190,7 @@ with DAG(
             "num": 2
         }
     )
+    '''
 
     fetch.expand(url=make_dynamic_url())
 
