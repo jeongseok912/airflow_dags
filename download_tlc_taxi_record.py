@@ -151,9 +151,9 @@ with DAG(
     schedule_interval=None,
 ) as dag:
 
-    latest_dataset_id = get_latest_dataset_id()
-    urls = make_dynamic_url(num=2)
-    fetch.expand(url=urls)
+    get_latest_dataset_id = get_latest_dataset_id()
+    get_urls = make_dynamic_url(num=2)
 
+    get_latest_dataset_id >> get_urls
 
-latest_dataset_id >> urls
+    fetch.expand(url=get_urls)
