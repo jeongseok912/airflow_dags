@@ -166,7 +166,7 @@ def async_download_upload(**context):
 
 @task
 def fetch(url):
-    formatter = logging.Formatter("%(levelname)s - %(message)s")
+    formatter = logging.Formatter("%(levelname)s - %(messages)s")
     logger = logging.getLogger("dataset")
     logger.setLevel(logging.INFO)
 
