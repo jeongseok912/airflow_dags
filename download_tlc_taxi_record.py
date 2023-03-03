@@ -104,6 +104,7 @@ def fetch(url, **context):
         logger.info(f"dataset {id}: {url}")
 
     # download dataset
+    print(context)
     logger.info(f"dataset {id}: download started.")
     download_start = time.time()
 
