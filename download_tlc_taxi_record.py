@@ -195,11 +195,13 @@ with DAG(
     make_dynamic_url = make_dynamic_url(num=2)
     fetch.expand(url=make_dynamic_url)
 
+    '''
     async_download_upload = PythonOperator(
         task_id="async_download_upload",
         python_callable=async_download_upload,
         provide_context=True
     )
+    '''
 
 get_latest_dataset_id >> make_dynamic_url
 # get_latest_dataset_id >> make_dynamic_url >> async_download_upload
