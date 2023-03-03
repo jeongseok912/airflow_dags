@@ -192,7 +192,7 @@ with DAG(
     )
     '''
 
-    fetch.expand(url=make_dynamic_url())
+    fetch.expand(url=make_dynamic_url(num=2))
 
     async_download_upload = PythonOperator(
         task_id="async_download_upload",
