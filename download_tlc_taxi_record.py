@@ -176,6 +176,12 @@ def fetch(url):
 
     file_name = url.split("/")[-1]
 
+    result = dbhandler.select(
+        f"SELECT id FROM dataset_meta WHERE dataset_link = {url};")
+
+    for row in result:
+        logger.info(f"id: {row[0]}, url: {url}")
+
     # download dataset
     logger.info(f"{url} - download started.")
     download_start = time.time()
