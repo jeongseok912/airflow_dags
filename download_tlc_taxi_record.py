@@ -21,9 +21,9 @@ class DBHandler(logging.StreamHandler):
         self.conn = self.hook.get_conn()
         self.cursor = self.conn.cursor()
 
-    def emit(self, record):
+    def emit(self, record, context=None):
         if record:
-            print(record)
+            print(context)
             self.cursor.execute(
                 f"INSERT INTO dataset_log (message, created_at) VALUES ('{record.msg}', SYSDATE());")
 
@@ -82,7 +82,7 @@ def make_dynamic_url(num, **context):
 
 
 @task
-def fetch(url):
+def fetch(url, **context):
     formatter = logging.Formatter("%(levelname)s - %(message)s")
     logger = logging.getLogger("dataset")
     logger.setLevel(logging.INFO)
@@ -129,7 +129,7 @@ def fetch(url):
     dir = file_name.split("-")[0].split("_")[-1]
     key = f"{dir}/{file_name}"
 
-    logger.info(f"dataset {id}: S3 upload started.")
+    logger.info(f"dataset {id}: S3 upload started.", context)
     upload_start = time.time()
 
     s3.put_object(Bucket=bucket, Key=key, Body=data)
