@@ -166,12 +166,12 @@ def async_download_upload(**context):
 
 @task
 def fetch(url):
-    format = "%(levelname)s %(message)s"
-    logging.basicConfig(format=format)
+    formatter = logging.Formatter("%(levelname)s - %(message)s")
     logger = logging.getLogger("dataset")
     logger.setLevel(logging.INFO)
 
     dbhandler = DBHandler()
+    dbhandler.setFormatter(formatter)
     logger.addHandler(dbhandler)
 
     downup_start = time.time()
@@ -184,23 +184,23 @@ def fetch(url):
 
     for row in result:
         id = str(row[0])
-        logger.info(f"id: {id}, url: {url}")
+        logger.info(f"id: {id}, msg: {url}")
 
     # download dataset
-    logger.info(f"id: {id} - download started.")
+    logger.info(f"id: {id}, msg: download started.")
     download_start = time.time()
 
     response = requests.get(url)
     if response.status_code != 200:
-        logger.error(f"id: {id} - download failed.")
-        raise Exception(f"id: {id} - download failed.")
+        logger.error(f"id: {id}, msg: download failed.")
+        raise Exception(f"id: {id}, msg: download failed.")
 
     data = response.content
 
-    logger.info(f"id: {id} - download completed.")
+    logger.info(f"id: {id}, msg: download completed.")
     download_end = time.time()
     download_elpased = int(download_end - download_start)
-    print(f"id: {id} - download elapsed: {download_elpased}s.")
+    print(f"id: {id}, msg: {download_elpased}s elapsed.")
 
     # upload to s3
     aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
@@ -212,19 +212,19 @@ def fetch(url):
     dir = file_name.split("-")[0].split("_")[-1]
     key = f"{dir}/{file_name}"
 
-    logger.info(f"id: {id} - s3 upload started.")
+    logger.info(f"id: {id}, msg: s3 upload started.")
     upload_start = time.time()
 
     s3.put_object(Bucket=bucket, Key=key, Body=data)
 
-    logger.info(f"id: {id} - s3 upload completed.")
+    logger.info(f"id: {id}, msg: s3 upload completed.")
     upload_end = time.time()
     upload_elapsed = int(upload_end - upload_start)
-    print(f"id: {id} - upload elapsed: {upload_elapsed}s.")
+    print(f"id: {id}, msg: {upload_elapsed}s elapsed.")
 
     downup_end = time.time()
     downup_elapsed = int(downup_end - downup_start)
-    print(f"id: {id} - total download & upload elapsed: {downup_elapsed}s.")
+    print(f"id: {id}, msg: {downup_elapsed}s total elapsed.")
 
     dbhandler.close()
 
