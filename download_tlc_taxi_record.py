@@ -166,7 +166,57 @@ def async_download_upload(**context):
 
 @task
 def fetch(url):
-    print(f"url : {url}")
+    logger = logging.getLogger("dataset")
+    logger.setLevel(logging.INFO)
+
+    dbhandler = DBHandler()
+    logger.addHandler(dbhandler)
+
+    downup_start = time.time()
+
+    file_name = url.split("/")[-1]
+
+    # download dataset
+    logger.info(f"{url} - download started.")
+    download_start = time.time()
+
+    response = requests.get(url)
+    if response.status_code != 200:
+        logger.error(f"{url} - download failed.")
+        raise Exception(f"{url} - download failed.")
+
+    data = response.content
+
+    logger.info(f"{url} - download completed.")
+    download_end = time.time()
+    download_elpased = int(download_end - download_start)
+    print(f"{url} - download elapsed: {download_elpased}s.")
+
+    # upload to s3
+    aws_access_key_id = Variable.get("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key = Variable.get("AWS_SECRET_ACCESS_KEY")
+
+    s3 = boto3.client("s3", aws_access_key_id=aws_access_key_id,
+                      aws_secret_access_key=aws_secret_access_key)
+    bucket = Variable.get("AWS_S3_BUCKET_TLC_TAXI")
+    dir = file_name.split("-")[0].split("_")[-1]
+    key = f"{dir}/{file_name}"
+
+    logger.info(f"{url} - s3 upload started.")
+    upload_start = time.time()
+
+    s3.put_object(Bucket=bucket, Key=key, Body=data)
+
+    logger.info(f"{url} - s3 upload completed.")
+    upload_end = time.time()
+    upload_elapsed = int(upload_end - upload_start)
+    print(f"{url} - upload elapsed: {upload_elapsed}s.")
+
+    downup_end = time.time()
+    downup_elapsed = int(downup_end - downup_start)
+    print(f"{url} - total download & upload elapsed: {downup_elapsed}s.")
+
+    dbhandler.close()
 
 
 with DAG(
@@ -192,8 +242,8 @@ with DAG(
     )
     '''
 
-    make_dynamic_url = make_dynamic_url(num=2)
-    fetch.expand(url=make_dynamic_url)
+    urls = make_dynamic_url(num=2)
+    fetch.expand(url=urls)
 
     '''
     async_download_upload = PythonOperator(
