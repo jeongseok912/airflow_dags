@@ -7,6 +7,7 @@ import asyncio
 import time
 
 from airflow import DAG
+from airflow.decorators import task
 from airflow.operators.python import PythonOperator
 from airflow.providers.mysql.operators.mysql import MySqlOperator
 from airflow.providers.mysql.hooks.mysql import MySqlHook
@@ -152,11 +153,6 @@ def async_download_upload(**context):
     print("***********************")
     start = time.time()
 
-    '''
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(gather(urls))
-    loop.close()
-    '''
     asyncio.run(gather(urls))
 
     print("***********************")
@@ -165,6 +161,11 @@ def async_download_upload(**context):
     end = time.time()
     elapsed = int(end - start)
     print(f"event time: {elapsed} sec")
+
+
+@task
+def fetch(url):
+    print(f"url : {url}")
 
 
 with DAG(
@@ -187,6 +188,9 @@ with DAG(
             "num": 2
         }
     )
+
+    fetch.expand(url="make_dynamic_url")
+
     async_download_upload = PythonOperator(
         task_id="async_download_upload",
         python_callable=async_download_upload,
